@@ -44,3 +44,17 @@ class EditItemForm(forms.ModelForm):
                 'class': INPUT_CLASSES
             }),
         }
+
+
+ 
+from .models import Rating
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['stars', 'comment']
+
+        widgets = {
+            'stars': forms.NumberInput(attrs={'min': 0, 'max': 5, 'step': 0.5}),
+            'comment': forms.Textarea(attrs={'rows': 4}),
+        }
