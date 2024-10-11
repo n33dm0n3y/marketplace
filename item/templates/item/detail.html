@@ -21,14 +21,19 @@
         {% endif %}
 
         {% if request.user == item.created_by %}
-            <div class="mt-6 p-6 bg-white rounded-xl">
-                <p>This is your item!</p>
-                <a href="{% url 'item:edit' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit</a>
-                <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
-            </div>
-        {% else %}
-            <div class="mt-6 text-center">
-                <a href="{% url 'inbox:new' item.id %}" class="inline-block px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Contact seller</a>
+        <div class="mt-6 p-6 bg-white rounded-xl">
+            <p>This is your item!</p>
+            <a href="{% url 'item:edit' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit</a>
+            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+        </div>
+    {% elif request.user.is_superuser %}
+        <div class="mt-6 p-6 bg-white rounded-xl">
+            <p>You hold administrative authority.</p>
+            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+        </div>
+    {% else %}
+        <div class="mt-6 text-center">
+            <a href="{% url 'inbox:new' item.id %}" class="inline-block px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Contact seller</a>
             <!-- Show Star Rating Section if this is not the user's item -->
             <div id="star-rating" class="mt-6 flex flex-col items-center">
                 <p id="emoji" style="font-size: 48px;">😞</p>
@@ -41,16 +46,18 @@
                 </div>
                 <p class="mt-2">Rating: <span id="rating-value">0</span></p>
             </div>
-
+    
             <div class="mt-6 text-center">
                 <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
             </div>
-
+    
             <!-- Display submitted rating -->
             <div id="submitted-rating" class="mt-6 text-center hidden">
                 <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
             </div>
-        {% endif %}
+        </div>
+    {% endif %}
+    
     </div>
 </div>
 

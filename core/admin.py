@@ -5,3 +5,4 @@ from .models import *
 
 
 admin.site.register(ContactModel)
+admin.site.register(ActivityLog)

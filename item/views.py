@@ -1,10 +1,15 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from unicodedata import category
 
 from .forms import NewItemForm, EditItemForm
 from .models import Item, Category
+
+
+# Check if the user is a superuser
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
 
 
 def items(request):
@@ -73,13 +78,12 @@ def edit(request, pk):
         'title': 'Edit item',
     })
 
+@superuser_required
 @login_required
 def delete(request, pk):
-    item = get_object_or_404(Item, pk=pk, created_by=request.user)
+    item = get_object_or_404(Item, pk=pk)
     item.delete()
-
-    return redirect('dashboard:index')
-
+    return redirect('core:index')
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
