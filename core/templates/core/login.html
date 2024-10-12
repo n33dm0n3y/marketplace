@@ -1,8 +1,30 @@
 {% extends 'core/base.html' %}
 
 {% block title %}Log in{% endblock %}
+{% load static %}
 
 {% block content %}
+{% if user.is_authenticated %}
+    <script>
+        window.location.href = "/";  <!-- Redirects to the homepage or a preferred page -->
+    </script>
+{% else %}
+    <style>
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .site-logo {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            display: inline-block;
+        }
+    </style>
+<div class="logo-container">
+    <img src="{% static 'img/logo.png' %}" alt="Logo" class="site-logo" />
+</div>
 <div class="w-1/2 my-6 mx-auto p-6 bg-gray-100 rounded-xl">
     <h1 class="mb-6 text-3xl">Log in</h1>
 
@@ -34,5 +56,6 @@
 
 
 </div>
+{% endif %}
 
 {% endblock %}

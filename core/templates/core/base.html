@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -152,6 +153,9 @@
                 font-size: 0.75rem;
             }
         }
+        .invisible {
+            visibility: hidden; /* Hides the image but keeps its space */
+        }
     </style>
     
     <title>{% block title %}{% endblock %} | AOM</title>
@@ -159,8 +163,19 @@
 
 <body class="flex flex-col min-h-screen">
     <nav class="navbar">
-        <a href="/" class="site-title">AOM: Angelite Online Marketplace</a>
-    
+        {% if user.is_authenticated %}
+            <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo" />
+        {% else %}
+            <!-- Empty img tag to preserve space -->
+            <img src="" alt="Logo" class="logo invisible" />
+            <a href="{% url 'core:signup' %}" class="nav-button signup">
+                <i class="fas fa-user-plus"></i> Sign up
+            </a>
+            <a href="{% url 'core:login' %}" class="nav-button login">
+                <i class="fas fa-user"></i> Log in
+            </a>
+        {% endif %}
+        
         <div class="nav-links">
             {% if request.user.is_authenticated %}
                 <a href="{% url 'item:new' %}" class="nav-link">
@@ -170,7 +185,7 @@
                     <i class="fas fa-th-list"></i> Browse
                 </a>
             {% endif %}
-            
+    
             {% if request.user.is_authenticated %}
                 {% if request.user.is_superuser %}
                     <a href="{% url 'core:admin_dashboard' %}" class="nav-button admin-panel">
@@ -185,13 +200,6 @@
                 </a>
                 <a href="{% url 'core:logout' %}" class="nav-button logout">
                     <i class="fas fa-box"></i> Logout
-                </a>
-            {% else %}
-                <a href="{% url 'core:signup' %}" class="nav-button signup">
-                    <i class="fas fa-user-plus"></i> Sign up
-                </a>
-                <a href="{% url 'core:login' %}" class="nav-button login">
-                    <i class="fas fa-user"></i> Log in
                 </a>
             {% endif %}
         </div>
