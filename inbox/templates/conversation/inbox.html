@@ -17,7 +17,6 @@
             <form action="{% url 'inbox:delete_contact_message' contact.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this message?');">
                 {% csrf_token %}
                 <button type="submit" class="delete-button">Delete</button>
-                <button type="button" class="reply-button">Reply</button>
             </form>
         </div>
     {% empty %}
