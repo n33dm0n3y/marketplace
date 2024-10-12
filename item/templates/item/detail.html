@@ -3,6 +3,8 @@
 {% block title %}{{ item.name }}{% endblock %}
 
 {% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <div class="grid grid-cols-5 gap-6">
     <div class="col-span-3">
         <img src="{{ item.image.url }}" class="rounded-xl">
@@ -19,17 +21,73 @@
                 {{ item.description }}
             </p>
         {% endif %}
-
         {% if request.user == item.created_by %}
         <div class="mt-6 p-6 bg-white rounded-xl">
             <p>This is your item!</p>
             <a href="{% url 'item:edit' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit</a>
             <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
         </div>
+
+         <!-- Show Star Rating Section if this is not the user's item -->
+         <div id="star-rating" class="mt-6 flex flex-col items-center">
+            <p id="emoji" style="font-size: 48px;">😞</p>
+            <div class="flex justify-center mt-2">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+            <p class="mt-2">Rating: <span id="rating-value">0</span></p>
+        </div>
+
+        <!-- Comment section -->
+        <div class="mt-6">
+            <label for="comment" class="block text-lg">Leave a Comment:</label>
+            <textarea id="comment" rows="4" class="w-full p-4 border border-gray-300 rounded-xl mt-2"></textarea>
+        </div>
+
+        <div class="mt-6 text-center">
+            <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
+        </div>
+
+        <!-- Display submitted rating -->
+        <div id="submitted-rating" class="mt-6 text-center hidden">
+            <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
+            <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
+        </div>
         {% elif request.user.is_superuser %}
         <div class="mt-6 p-6 bg-white rounded-xl">
             <p>You hold administrative authority.</p>
             <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+        </div>
+         <!-- Show Star Rating Section if this is not the user's item -->
+         <div id="star-rating" class="mt-6 flex flex-col items-center">
+            <p id="emoji" style="font-size: 48px;">😞</p>
+            <div class="flex justify-center mt-2">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+            <p class="mt-2">Rating: <span id="rating-value">0</span></p>
+        </div>
+
+        <!-- Comment section -->
+        <div class="mt-6">
+            <label for="comment" class="block text-lg">Leave a Comment:</label>
+            <textarea id="comment" rows="4" class="w-full p-4 border border-gray-300 rounded-xl mt-2"></textarea>
+        </div>
+
+        <div class="mt-6 text-center">
+            <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
+        </div>
+
+        <!-- Display submitted rating -->
+        <div id="submitted-rating" class="mt-6 text-center hidden">
+            <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
+            <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
         </div>
         {% else %}
         <div class="mt-6 text-center">
@@ -68,11 +126,21 @@
     </div>
 </div>
 
+
+
 <!-- Display all ratings -->
 <div id="ratings-section" class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
     <h2 class="mb-6 text-2xl">Ratings and Reviews</h2>
     <div id="ratings-list">
         <!-- Ratings will be populated here -->
+        {% for rating in ratings %}
+            <div class="rating-item mb-4">
+                <p><strong>{{ rating.user.username }}:</strong> {{ rating.rating }} - {{ rating.comment }}</p>
+                {% if request.user == rating.user or request.user.is_superuser %}
+                    <a href="{% url 'item:delete_rating' item_id=item.id rating_id=rating.id %}" class="text-red-500">Delete Rating</a>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 
     <!-- Average rating display -->
@@ -83,6 +151,10 @@
         </div>
     </div>
 </div>
+
+
+
+
 
 <div class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
     <h2 class="mb-12 text-2xl text-center">Related items</h2>
@@ -191,59 +263,8 @@
         }
     });
 
-    // Fetch all ratings for this item
-    fetch("{% url 'item:get_item_ratings' item.id %}")
-    .then(response => response.json())
-    .then(data => {
-        const ratingsList = document.getElementById('ratings-list');
-        const averageStars = document.getElementById('average-stars');
-        let totalRating = 0;
-        let totalCount = 0;
+    
 
-        if (data.ratings && data.ratings.length > 0) {
-            data.ratings.forEach(rating => {
-                const ratingElement = document.createElement('div');
-                ratingElement.classList.add('rating');
 
-                // Create star elements based on the rating value
-                const starElements = [];
-                for (let i = 1; i <= 5; i++) {
-                    const star = document.createElement('span');
-                    star.innerHTML = '&#9733;'; // Unicode for star
-                    star.style.fontSize = '30px'; // Star size
-                    star.style.color = i <= rating.rating ? 'gold' : 'lightgray'; // Color gold for rated stars, lightgray for un-rated
-                    starElements.push(star);
-                }
-
-                // Add the stars to the rating element
-                ratingElement.appendChild(document.createElement('p')).innerHTML = `<strong>${rating.user}:</strong>`;
-                starElements.forEach(star => ratingElement.appendChild(star));  // Add each star to the rating element
-                ratingElement.appendChild(document.createElement('p')).innerText = rating.comment;
-
-                // Append the rating element to the list
-                ratingsList.appendChild(ratingElement);
-
-                totalRating += parseInt(rating.rating, 10);
-                totalCount++;
-            });
-
-            // Calculate average rating and display
-            const averageRating = totalRating / totalCount;
-            const averageStarElements = [];
-            for (let i = 1; i <= 5; i++) {
-                const star = document.createElement('span');
-                star.innerHTML = '&#9733;'; // Unicode for star
-                star.style.fontSize = '30px'; // Star size
-                star.style.color = i <= Math.round(averageRating) ? 'gold' : 'lightgray'; // Gold for rated stars
-                averageStarElements.push(star);
-            }
-            averageStarElements.forEach(star => averageStars.appendChild(star));
-        } else {
-            ratingsList.innerHTML = '<p>No ratings yet.</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching ratings:', error);
-    });
 </script>
 {% endblock %}

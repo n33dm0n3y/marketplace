@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from django.contrib import messages
 from .forms import NewItemForm, EditItemForm, RatingForm
 from .models import Item, Category, Rating
 
@@ -167,6 +167,8 @@ def get_item_ratings(request, item_id):
     }, status=200)
 
 
+
+
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from .models import Rating
@@ -186,3 +188,18 @@ def RateEdit(request, pk):
         return JsonResponse({"message": "Rating updated successfully"})
     
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+
+@login_required
+def delete_rating(request, rating_id, item_id):
+    rating = get_object_or_404(Rating, id=rating_id, item_id=item_id)
+
+    # Only allow the user who posted the rating or a superuser to delete it
+    if request.user == rating.user or request.user.is_superuser:
+        rating.delete()
+        messages.success(request, 'Rating deleted successfully.')
+    else:
+        messages.error(request, 'You do not have permission to delete this rating.')
+    
+    return redirect('item:detail', pk=item_id)  # Use 'pk' for the URL argument

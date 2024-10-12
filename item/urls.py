@@ -13,8 +13,6 @@ urlpatterns = [
     path('item/<int:item_id>/ratings/', views.get_item_ratings, name='get_item_ratings'),
     path('rate/edit/<int:pk>/', views.RateEdit, name='rate_edit'),
 
-    
-
-
-    
+    path('item/<int:item_id>/rating/<int:rating_id>/delete/', views.delete_rating, name='delete_rating'),
 ]
+
