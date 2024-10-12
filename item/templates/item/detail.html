@@ -133,16 +133,7 @@
     <h2 class="mb-6 text-2xl">Ratings and Reviews</h2>
     <div id="ratings-list">
         <!-- Ratings will be populated here -->
-        {% for rating in ratings %}
-            <div class="rating-item mb-4">
-                <p><strong>{{ rating.user.username }}:</strong> {{ rating.rating }} - {{ rating.comment }}</p>
-                {% if request.user == rating.user or request.user.is_superuser %}
-                    <a href="{% url 'item:delete_rating' item_id=item.id rating_id=rating.id %}" class="text-red-500">Delete Rating</a>
-                {% endif %}
-            </div>
-        {% endfor %}
     </div>
-
     <!-- Average rating display -->
     <div id="average-rating" class="mt-6 text-center">
         <p class="text-lg">Average Rating:</p>
@@ -151,8 +142,6 @@
         </div>
     </div>
 </div>
-
-
 
 
 
@@ -263,8 +252,53 @@
         }
     });
 
-    
-
+    fetch("{% url 'item:get_item_ratings' item.id %}")
+    .then(response => response.json())
+    .then(data => {
+        const ratingsList = document.getElementById('ratings-list');
+        const averageStars = document.getElementById('average-stars');
+        let totalRating = 0;
+        let totalCount = 0;
+        if (data.ratings && data.ratings.length > 0) {
+            data.ratings.forEach(rating => {
+                const ratingElement = document.createElement('div');
+                ratingElement.classList.add('rating');
+                // Create star elements based on the rating value
+                const starElements = [];
+                for (let i = 1; i <= 5; i++) {
+                    const star = document.createElement('span');
+                    star.innerHTML = '&#9733;'; // Unicode for star
+                    star.style.fontSize = '30px'; // Star size
+                    star.style.color = i <= rating.rating ? 'gold' : 'lightgray'; // Color gold for rated stars, lightgray for un-rated
+                    starElements.push(star);
+                }
+                // Add the stars to the rating element
+                ratingElement.appendChild(document.createElement('p')).innerHTML = `<strong>${rating.user}:</strong>`;
+                starElements.forEach(star => ratingElement.appendChild(star));  // Add each star to the rating element
+                ratingElement.appendChild(document.createElement('p')).innerText = rating.comment;
+                // Append the rating element to the list
+                ratingsList.appendChild(ratingElement);
+                totalRating += parseInt(rating.rating, 10);
+                totalCount++;
+            });
+            // Calculate average rating and display
+            const averageRating = totalRating / totalCount;
+            const averageStarElements = [];
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.innerHTML = '&#9733;'; // Unicode for star
+                star.style.fontSize = '30px'; // Star size
+                star.style.color = i <= Math.round(averageRating) ? 'gold' : 'lightgray'; // Gold for rated stars
+                averageStarElements.push(star);
+            }
+            averageStarElements.forEach(star => averageStars.appendChild(star));
+        } else {
+            ratingsList.innerHTML = '<p>No ratings yet.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching ratings:', error);
+    });
 
 </script>
 {% endblock %}
