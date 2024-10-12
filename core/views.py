@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from core.models import ActivityLog
 from .models import ContactModel
+from .forms import ContactForm
+from django.contrib.auth.decorators import login_required
 from item.models import Category, Item
 from .forms import SignupForm
 from django.contrib.auth import logout
@@ -113,10 +115,20 @@ def logout_view(request):
     logout(request)
     return redirect('core:login')
 
+@login_required
 def contact(request):
     if request.method == 'POST':
-        ContactModel.objects.create(first_name=request.POST['first_name'], last_name=request.POST['last_name'], email=request.POST['email'], message=request.POST['message'])
-    return render(request, 'core/contact.html')
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact = form.save(commit=False)
+            # Attach the logged-in user as the sender
+            contact.user = request.user
+            contact.save()
+            return redirect('core:index')  # Redirect after submitting
+    else:
+        form = ContactForm()
+
+    return render(request, 'core/contact.html', {'form': form})
 
 def privacy(request):
     return render(request, 'core/privacy.html')

@@ -2,10 +2,11 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from item.models import Item
-
+from core.models import ContactModel
 
 class Conversation(models.Model):
     item = models.ForeignKey(Item, related_name='conversations', on_delete=models.CASCADE)
+    contact_message = models.ForeignKey(ContactModel, on_delete=models.CASCADE)
     members = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)

@@ -6,21 +6,31 @@
 <h1 class="mb-6 text-3xl">Conversation</h1>
 
 <div class="space-y-6">
-    {% for message in conversation.messages.all %}
-        <div class="p-6 flex {% if message.created_by == request.user %}bg-blue-100{% else %}bg-gray-100{% endif %} rounded-xl">
+    {% if is_contact %}
+        <div class="p-6 flex bg-gray-100 rounded-xl">
             <div>
-                <p class="mb-4"><strong>{{ message.created_by.username }}</strong> @ {{ message.created_at }}</p>
-                <p>{{ message.content }}</p>
+                <p class="mb-4"><strong>From:</strong> {{ conversation.contact_message.first_name }} {{ conversation.contact_message.last_name }}</p>
+                <p><strong>Email:</strong> {{ conversation.contact_message.email }}</p>
+                <p><strong>Message:</strong></p>
+                <p>{{ conversation.contact_message.message }}</p>
             </div>
         </div>
-    {% endfor %}
+    {% else %}
+        {% for message in conversation.messages.all %}
+            <div class="p-6 flex {% if message.created_by == request.user %}bg-blue-100{% else %}bg-gray-100{% endif %} rounded-xl">
+                <div>
+                    <p class="mb-4"><strong>{{ message.created_by.username }}</strong> @ {{ message.created_at }}</p>
+                    <p>{{ message.content }}</p>
+                </div>
+            </div>
+        {% endfor %}
+
+        <form method="post" action="." class="mt-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button class="py-4 px-8 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Send</button>
+        </form>
+    {% endif %}
 </div>
-
-<form method="post" action="." class="mt-6">
-    {% csrf_token %}
-
-    {{ form.as_p }}
-
-    <button class="py-4 px-8 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Send</button>
-</form>
 {% endblock %}
