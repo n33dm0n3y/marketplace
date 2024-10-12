@@ -24,31 +24,3 @@ class ActivityLog(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.action} at {self.timestamp}'
     
-def contact_view(request):
-    if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        message = request.POST.get('message')
-
-        # Save the contact message in the database
-        contact_message = ContactModel.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            message=message,
-            user=request.user if request.user.is_authenticated else None
-        )
-
-        # Send an email to the admins
-        send_mail(
-            subject=f"New Contact Us message from {first_name} {last_name}",
-            message=message,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=['angelite.online.marketplace.@gmail.com'],  # Replace with the admin email
-            fail_silently=False,
-        )
-
-        return redirect('success')  # Redirect to a success page after form submission
-
-    return render(request, 'core/contact.html')
