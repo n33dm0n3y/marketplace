@@ -117,34 +117,40 @@ def logout_view(request):
     logout(request)
     return redirect('core:login')
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ContactForm
+from .models import ContactModel
+from django.core.mail import send_mail
+from django.conf import settings
+
 def contact_view(request):
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        message = request.POST.get('message')
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_message = form.save(commit=False)
+            contact_message.user = request.user if request.user.is_authenticated else None
+            contact_message.save()
 
-        # Save the contact message in the database
-        contact_message = ContactModel.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            message=message,
-            user=request.user if request.user.is_authenticated else None
-        )
+            # Send an email to the admins
+            send_mail(
+                subject=f"New Contact Us message from {contact_message.first_name} {contact_message.last_name}",
+                message=contact_message.message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=['angelite.online.marketplace@gmail.com'],  # Replace with the admin email
+                fail_silently=False,
+            )
 
-        # Send an email to the admins
-        send_mail(
-            subject=f"New Contact Us message from {first_name} {last_name}",
-            message=message,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=['angelite.online.marketplace.@gmail.com'],  # Replace with the admin email
-            fail_silently=False,
-        )
+            messages.success(request, 'Your message has been sent successfully!')
+            return redirect('core:index')  # Redirect to homepage after form submission
+        else:
+            messages.error(request, 'Please fill this form in a decent manner.')  # Notify user of form errors
 
-        return redirect('core:index')  # Redirect to homepage after form submission
+    else:
+        form = ContactForm()  # Create an empty form for GET requests
 
-    return render(request, 'core/contact.html')
+    return render(request, 'core/contact.html', {'form': form})
+
 
 
 def privacy(request):

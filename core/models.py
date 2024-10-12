@@ -5,7 +5,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 # Contact model
 class ContactModel(models.Model):
-    first_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, null=False)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
     message = models.TextField()
