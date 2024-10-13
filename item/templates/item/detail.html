@@ -7,165 +7,144 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <div class="grid grid-cols-5 gap-6">
     <div class="col-span-3">
-        <img src="{{ item.image.url }}" class="rounded-xl">
+        <img src="{{ item.image.url }}" class="w-full h-full object-cover rounded-xl shadow-md">
     </div>
+    
 
     <div class="col-span-2 p-6 bg-gray-100 rounded-xl">
         <h1 class="mb-6 text-3xl">{{ item.name }}</h1>
-        <p class="text-gray-500"><strong>Price: ₱</strong>{{ item.price }}</p>
-        <p class="text-gray-500"><strong>Seller: </strong>{{ item.created_by.username }}</p>
+        <p class="text-lg font-medium text-gray-800"><strong>Price: ₱</strong>{{ item.price }}</p>
+        <p class="text-lg font-medium text-gray-800"><strong>Seller: </strong>{{ item.created_by.username }}</p>
 
         {% if item.description %}
-            <p class="text-gray-700">
-                <strong class="text-gray-500">Description: </strong><br>
+            <p cclass="text-lg font-medium text-gray-800"><strong class="text-lg font-medium text-gray-800">Description: </strong><br>
                 {{ item.description }}
             </p>
         {% endif %}
         {% if request.user == item.created_by %}
-        <div class="mt-6 p-6 bg-white rounded-xl">
-            <p>This is your item!</p>
-            <a href="{% url 'item:edit' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit</a>
-            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+        <div class="mt-3 p-4 bg-white shadow-lg rounded-lg mb-2">
+            <p class="text-lg font-medium text-gray-800">This is your item!</p>
+            <a href="{% url 'item:edit' item.id %}" class="inline-block mt-3 px-4 py-2 text-sm font-semibold bg-teal-500 text-white rounded-lg transition duration-200 hover:bg-teal-600 focus:outline-none focus:ring focus:ring-red-300">Edit</a>
+            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-3 px-4 py-2 text-sm font-semibold bg-red-500 text-white rounded-lg transition duration-200 hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300">Delete</a>
         </div>
 
-         <!-- Show Star Rating Section if this is not the user's item -->
-         <div id="star-rating" class="mt-6 flex flex-col items-center">
-            <p id="emoji" style="font-size: 48px;">😞</p>
-            <div class="flex justify-center mt-2">
-                <span class="star" data-value="1">&#9733;</span>
-                <span class="star" data-value="2">&#9733;</span>
-                <span class="star" data-value="3">&#9733;</span>
-                <span class="star" data-value="4">&#9733;</span>
-                <span class="star" data-value="5">&#9733;</span>
+        <div id="star-rating" class="flex flex-col p-4 bg-white shadow-lg rounded-lg">
+            <p id="emoji" class="text-5xl mb-4 flex justify-center">😞</p>
+            <div class="flex justify-center space-x-2">
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="1">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="2">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="3">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="4">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="5">&#9733;</span>
             </div>
-            <p class="mt-2">Rating: <span id="rating-value">0</span></p>
-        </div>
-
-        <!-- Comment section -->
-        <div class="mt-6">
-            <label for="comment" class="block text-lg">Leave a Comment:</label>
-            <textarea id="comment" rows="4" class="w-full p-4 border border-gray-300 rounded-xl mt-2"></textarea>
-        </div>
-
-        <div class="mt-6 text-center">
-            <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
-        </div>
-
-        <!-- Display submitted rating -->
-        <div id="submitted-rating" class="mt-6 text-center hidden">
-            <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
-            <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
+            <p class="mt-4 text-lg font-medium text-center text-gray-700">Rating: <span id="rating-value" class="font-bold text-xl text-black">0</span></p>
+            <div class="mt-1">
+                <label for="comment" class="block text-lg">Leave a Comment:</label>
+                <textarea id="comment" rows="4" class="w-full h-32 p-1 border border-gray-300 rounded-xl mt-1 overflow-y-auto" style="resize: none;"></textarea>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="submit-rating" class="px-3 py-1 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
+            </div>
+            <div id="submitted-rating" class="mt-6 text-center hidden">
+                <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
+                <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
+            </div>  
         </div>
         {% elif request.user.is_superuser %}
-        <div class="mt-6 p-6 bg-white rounded-xl">
-            <p>You hold administrative authority.</p>
-            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+        <div class="mt-3 p-4 bg-white shadow-lg rounded-lg mb-2">
+            <p class="text-lg font-medium text-gray-800">You hold administrative authority.</p>
+            <a href="{% url 'item:delete' item.id %}" class="inline-block mt-3 px-4 py-2 text-sm font-semibold bg-red-500 text-white rounded-lg transition duration-200 hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300">Delete</a>
         </div>
-         <!-- Show Star Rating Section if this is not the user's item -->
-         <div id="star-rating" class="mt-6 flex flex-col items-center">
-            <p id="emoji" style="font-size: 48px;">😞</p>
-            <div class="flex justify-center mt-2">
-                <span class="star" data-value="1">&#9733;</span>
-                <span class="star" data-value="2">&#9733;</span>
-                <span class="star" data-value="3">&#9733;</span>
-                <span class="star" data-value="4">&#9733;</span>
-                <span class="star" data-value="5">&#9733;</span>
+         <div id="star-rating" class="flex flex-col p-4 bg-white shadow-lg rounded-lg">
+            <p id="emoji" class="text-5xl mb-4 flex justify-center">😞</p>
+            <div class="flex justify-center space-x-2">
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="1">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="2">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="3">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="4">&#9733;</span>
+                <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="5">&#9733;</span>
             </div>
-            <p class="mt-2">Rating: <span id="rating-value">0</span></p>
-        </div>
-
-        <!-- Comment section -->
-        <div class="mt-6">
-            <label for="comment" class="block text-lg">Leave a Comment:</label>
-            <textarea id="comment" rows="4" class="w-full p-4 border border-gray-300 rounded-xl mt-2"></textarea>
-        </div>
-
-        <div class="mt-6 text-center">
-            <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
-        </div>
-
-        <!-- Display submitted rating -->
-        <div id="submitted-rating" class="mt-6 text-center hidden">
-            <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
-            <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
-        </div>
-        {% else %}
-        <div class="mt-6 text-center">
-            <a href="{% url 'inbox:new' item.id %}" class="inline-block px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Contact seller</a>
-            
-            <!-- Show Star Rating Section if this is not the user's item -->
-            <div id="star-rating" class="mt-6 flex flex-col items-center">
-                <p id="emoji" style="font-size: 48px;">😞</p>
-                <div class="flex justify-center mt-2">
-                    <span class="star" data-value="1">&#9733;</span>
-                    <span class="star" data-value="2">&#9733;</span>
-                    <span class="star" data-value="3">&#9733;</span>
-                    <span class="star" data-value="4">&#9733;</span>
-                    <span class="star" data-value="5">&#9733;</span>
-                </div>
-                <p class="mt-2">Rating: <span id="rating-value">0</span></p>
-            </div>
-
-            <!-- Comment section -->
-            <div class="mt-6">
+            <!-- Rating Display -->
+            <p class="mt-4 text-lg font-medium text-center text-gray-700">Rating: <span id="rating-value" class="font-bold text-xl text-black">0</span></p>
+            <div class="mt-1">
                 <label for="comment" class="block text-lg">Leave a Comment:</label>
-                <textarea id="comment" rows="4" class="w-full p-4 border border-gray-300 rounded-xl mt-2"></textarea>
+                <textarea id="comment" rows="4" class="w-full h-32 p-1 border border-gray-300 rounded-xl mt-1 overflow-y-auto" style="resize: none;"></textarea>
             </div>
-
             <div class="mt-6 text-center">
-                <button id="submit-rating" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
+                <button id="submit-rating" class="px-3 py-1 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
             </div>
-
             <!-- Display submitted rating -->
             <div id="submitted-rating" class="mt-6 text-center hidden">
                 <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
                 <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
-            </div>
+            </div>  
         </div>
+        {% else %}
+        <div class="mt-6 text-center">
+            <a href="{% url 'inbox:new' item.id %}" class="inline-block px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Contact seller</a>
+            <div id="star-rating" class="flex flex-col p-4 bg-white shadow-lg rounded-lg">
+                <!-- Emoji Display -->
+                <p id="emoji" class="text-5xl mb-4 flex justify-center">😞</p>
+                <!-- Star Ratings -->
+                <div class="flex justify-center space-x-2">
+                    <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="1">&#9733;</span>
+                    <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="2">&#9733;</span>
+                    <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="3">&#9733;</span>
+                    <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="4">&#9733;</span>
+                    <span class="star text-3xl cursor-pointer text-gray-400 hover:text-yellow-400 transition duration-200" data-value="5">&#9733;</span>
+                </div>
+                <!-- Rating Display -->
+                <p class="mt-4 text-lg font-medium text-center text-gray-700">Rating: <span id="rating-value" class="font-bold text-xl text-black">0</span></p>
+                <div class="mt-1">
+                    <label for="comment" class="block text-lg">Leave a Comment:</label>
+                    <textarea id="comment" rows="4" class="w-full h-32 p-1 border border-gray-300 rounded-xl mt-1 overflow-y-auto" style="resize: none;"></textarea>
+                </div>
+                <div class="mt-6 text-center">
+                    <button id="submit-rating" class="px-3 py-1 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">Submit Rating</button>
+                </div>
+                <!-- Display submitted rating -->
+                <div id="submitted-rating" class="mt-6 text-center hidden">
+                    <p class="text-lg">Your submitted rating: <span id="final-rating-value" class="font-semibold"></span></p>
+                    <p class="text-lg">Your comment: <span id="final-comment" class="font-semibold"></span></p>
+                </div>  
+            </div>
         {% endif %}
     </div>
 </div>
-
-
-
 <!-- Display all ratings -->
-<div id="ratings-section" class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
-    <h2 class="mb-6 text-2xl">Ratings and Reviews</h2>
-    <div id="ratings-list">
-        <!-- Ratings will be populated here -->
-    </div>
-    <!-- Average rating display -->
-    <div id="average-rating" class="mt-6 text-center">
-        <p class="text-lg">Average Rating:</p>
-        <div class="flex justify-center mt-2" id="average-stars">
-            <!-- Average stars will be populated here -->
+<div id="ratings-section" class="mt-3 px-3 py-6 bg-gray-100 rounded-xl ">
+    <h2 class="mb-2 text-2xl">Ratings and Reviews</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="ratings-list" class="border-r pr-4"> </div>
+        <div id="average-rating" class="text-center pl-4">
+            <h3 class="text-lg font-semibold mb-2">Average Rating:</h3>
+            <div class="flex justify-center mt-2" id="average-stars">
+                <!-- Average stars will be populated here -->
+            </div>
         </div>
     </div>
 </div>
+<div class="mt-1 py-2 bg-gray-100 rounded-xl shadow-lg">
+    <h2 class="mb-1 text-2xl text-center bg-gray-500 text-white py-2 rounded-t-xl">Related items</h2> <!-- Added background color and padding -->
 
-
-
-<div class="mt-6 px-6 py-12 bg-gray-100 rounded-xl">
-    <h2 class="mb-12 text-2xl text-center">Related items</h2>
-
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-6 gap-3">
         {% for related_item in related_items %}
-            <div>
+            <div class="max-w-xs mx-auto"> <!-- Set max width for the card -->
                 <a href="{% url 'item:detail' related_item.id %}">
-                    <div>
-                        <img src="{{ related_item.image.url }}" class="rounded-t-xl">
+                    <div class="h-40 overflow-hidden"> <!-- Set a fixed height for the card -->
+                        <img src="{{ related_item.image.url }}" class="w-full h-full object-cover rounded-t-xl"> <!-- Full width and height image -->
                     </div>
-
-                    <div class="p-6 bg-white rounded-b-xl">
-                        <h2 class="text-2xl">{{ related_item.name }}</h2>
-                        <p class="text-gray-500">Price: {{ related_item.price }}</p>
+    
+                    <div class="p-4 bg-white rounded-b-xl">
+                        <h2 class="text-xl text-center">{{ related_item.name }}</h2> <!-- Centered item name -->
+                        <p class="text-gray-500 text-center">Price: ₱{{ related_item.price }}</p> <!-- Centered price -->
                     </div>
                 </a>
             </div>
         {% endfor %}
     </div>
 </div>
-
+</div>
 <style>
     .star {
         font-size: 40px; /* Star size */
@@ -177,7 +156,6 @@
         color: gold;
     }
 </style>
-
 <script>
     let ratingValue = 0;
 
