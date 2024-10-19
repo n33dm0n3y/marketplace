@@ -8,20 +8,20 @@
 <div class="space-y-6">
     <h2 class="text-2xl font-bold">Contact Messages</h2>
     {% if contact_conversations %}
-    {% for contact in contact_conversations %}
-        <div class="p-6 flex bg-gray-100 rounded-xl cursor-pointer">
-            <div class="flex-grow" onclick="openModal('{{ contact.first_name }} {{ contact.last_name }}', '{{ contact.email }}', '{{ contact.message }}')">
-                <p class="mb-4"><strong>{{ contact.first_name }} {{ contact.last_name }}</strong> | {{ contact.sent_at }}</p>
-                <p>Email: {{ contact.email }}</p>
+        {% for conversation in contact_conversations %}
+            <div class="p-6 flex bg-gray-100 rounded-xl cursor-pointer">
+                <div class="flex-grow" onclick="openModal('{{ conversation.contact_message.first_name }} {{ conversation.contact_message.last_name }}', '{{ conversation.contact_message.email }}', '{{ conversation.contact_message.message }}')">
+                    <p class="mb-4"><strong>{{ conversation.contact_message.first_name }} {{ conversation.contact_message.last_name }}</strong> | {{ conversation.contact_message.created_at }}</p>
+                    <p>Email: {{ conversation.contact_message.email }}</p>
+                </div>
+                <form action="{% url 'inbox:delete_contact_message' conversation.contact_message.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
             </div>
-            <form action="{% url 'inbox:delete_contact_message' contact.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this message?');">
-                {% csrf_token %}
-                <button type="submit" class="delete-button">Delete</button>
-            </form>
-        </div>
-    {% empty %}
-        <p>No contact messages found.</p>
-    {% endfor %}
+        {% empty %}
+            <p>No contact messages found.</p>
+        {% endfor %}
     {% else %}
         <p>No contact messages found.</p>
     {% endif %}

@@ -61,31 +61,32 @@ def delete_contact_message(request, contact_id):
 
 @login_required
 def inbox(request):
-    contact_conversations = ContactModel.objects.all() if request.user.is_superuser else []
+    contact_conversations = Conversation.objects.filter(members=request.user)
     
     return render(request, 'conversation/inbox.html', {
         'contact_conversations': contact_conversations,
     })
 
 
+
 @login_required
 def detail(request, pk):
-    conversation = get_object_or_404(Conversation, pk=pk, members__in=[request.user.id])
+    # Retrieve the conversation, ensuring the user is a member
+    conversation = get_object_or_404(Conversation, pk=pk, members=request.user)
 
     if request.method == 'POST':
         form = ConversationMessageForm(request.POST)
 
         if form.is_valid():
+            # Create a new message instance but do not save it yet
             conversation_message = form.save(commit=False)
             conversation_message.conversation = conversation
             conversation_message.created_by = request.user
-            conversation_message.save()
+            conversation_message.save()  # Save the message to the database
 
-            conversation.save()
-
-            return redirect('inbox:detail', pk=pk)
+            return redirect('inbox:detail', pk=pk)  # Redirect to the same conversation detail page
     else:
-        form = ConversationMessageForm()
+        form = ConversationMessageForm()  # Create a new form instance for GET requests
 
     return render(request, 'conversation/detail.html', {
         'conversation': conversation,
